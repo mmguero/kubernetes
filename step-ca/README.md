@@ -27,12 +27,14 @@ $ step crypto keypair ssh_host_ca_key.pub ssh_host_ca_key
 Please enter the password to encrypt the private key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 $ step crypto keypair ssh_user_ca_key.pub ssh_user_ca_key
 Please enter the password to encrypt the private key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+$ tr -d '\n' < ssh_host_ca_key.pub | sponge ssh_host_ca_key.pub
+$ tr -d '\n' < ssh_user_ca_key.pub | sponge ssh_user_ca_key.pub
 ```
 4. Add the SSH keys to `values.yaml`
 ```bash
 $ yq eval -i '
-  .inject.certificates.ssh.host_ca = strload("ssh_host_ca_key.pub") |
-  .inject.certificates.ssh.user_ca = strload("ssh_user_ca_key.pub") |
+  .inject.certificates.ssh_host_ca = strload("ssh_host_ca_key.pub") |
+  .inject.certificates.ssh_user_ca = strload("ssh_user_ca_key.pub") |
   .inject.secrets.ssh.host_ca_key = strload("ssh_host_ca_key") |
   .inject.secrets.ssh.user_ca_key = strload("ssh_user_ca_key")
 ' ./values.yaml
@@ -40,6 +42,7 @@ $ rm -f ./ssh_host_ca_key ./ssh_host_ca_key.pub ./ssh_user_ca_key ./ssh_user_ca_
 ```
 5. Add the ACME provisioner to `values.yaml` and add enableSSHCA  claim to JWK provisioner
 ```bash
+$ yq -i '.inject.config.files."ca.json".ssh.enabled = true' values.yaml
 $ sed -i '/enableAdmin:/a \ \ \ \ \ \ \ \ \ \ ssh: {"hostKey": "/home/step/secrets/ssh_host_ca_key", "userKey": "/home/step/secrets/ssh_user_ca_key"}' values.yaml
 $ sed -i 's/\("ssh":[[:space:]]*{}}\)/\1,"claims":{"enableSSHCA":true}/' values.yaml
 $ sed -i '/"type":[[:space:]]*"JWK"/a \ \ \ \ \ \ \ \ \ \ \ \ - {"type":"ACME","name":"acme"}' values.yaml
