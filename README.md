@@ -1,9 +1,9 @@
 ### Setup
 
 1. install k3s
-    * `curl -sfL https://get.k3s.io | sh -`
-    * *or, with [k3sup](https://github.com/alexellis/k3sup)*
     * `k3sup install --local --k3s-channel stable --k3s-extra-args="--data-dir=/media/extra/k3s --kubelet-arg=root-dir=/media/extra/kubelet"`
+    * *or*, manually:
+    * `curl -sfL https://get.k3s.io | sh -`
 3. `sudo cp /etc/rancher/k3s/k3s.yaml /home/user/kubeconfig`
 4. `sudo chown user:user /home/user/kubeconfig`
 4. uninstall traefik
@@ -11,9 +11,10 @@
     * `helm uninstall traefik-crd -n kube-system`
     * `kubectl get pods -n kube-system | grep traefik | awk '{print $1}' | xargs -r -I "XXX" kubectl delete pod "XXX" -n kube-system`
 5. install ingress-nginx
+    * [`./scripts/deploy_ingress_nginx.sh -v -k $KUBECONFIG -s`](./scripts/deploy_ingress_nginx.sh)
+    * *or*, manually:
     * `kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.13.0/deploy/static/provider/cloud/deploy.yaml`
-    * *or*
-    * [`deploy_ingress_nginx.sh -v -k $KUBECONFIG -s`](https://github.com/mmguero-dev/Malcolm/blob/main/kubernetes/vagrant/deploy_ingress_nginx.sh)
+        * however doing this you may need to enable ssl-passthrough manually
 6. `kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=120s`
 7. `kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml`
 8. `kubectl apply -f matallb/metallb-ip-pool.yaml`
