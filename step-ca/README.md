@@ -21,21 +21,44 @@ Choose a password for your CA keys and first provisioner.
 Generating root certificate... done!
 Generating intermediate certificate... done!
 ```
-3. Add the ACME provisioner to `values.yaml`
+3. Generate SSH host and user CA keys (for SSH key provisioning)
 ```bash
-$ sed -i '/"type":"JWK"/a \ \ \ \ \ \ \ \ \ \ \ \ - {"type":"ACME","name":"acme"}' values.yaml
+$ step crypto keypair ssh_host_ca_key.pub ssh_host_ca_key
+Please enter the password to encrypt the private key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+$ step crypto keypair ssh_user_ca_key.pub ssh_user_ca_key
+Please enter the password to encrypt the private key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+4. Add the SSH keys to `values.yaml`
+```bash
+$ yq eval -i '
+  .inject.certificates.ssh.host_ca = strload("ssh_host_ca_key.pub") |
+  .inject.certificates.ssh.user_ca = strload("ssh_user_ca_key.pub") |
+  .inject.secrets.ssh.host_ca_key = strload("ssh_host_ca_key") |
+  .inject.secrets.ssh.user_ca_key = strload("ssh_user_ca_key")
+' ./values.yaml
+$ rm -f ./ssh_host_ca_key ./ssh_host_ca_key.pub ./ssh_user_ca_key ./ssh_user_ca_key.pub
+```
+5. Add the ACME provisioner to `values.yaml` and add enableSSHCA  claim to JWK provisioner
+
+ssh: {"hostKey": "/home/step/secrets/ssh_host_ca_key", "userKey": "/home/step/secrets/ssh_user_ca_key"}
+
+```bash
+$ sed -i '/enableAdmin:/a \ \ \ \ \ \ \ \ \ \ ssh: {"hostKey": "/home/step/secrets/ssh_host_ca_key", "userKey": "/home/step/secrets/ssh_user_ca_key"}' values.yaml
+$ sed -i 's/\("ssh":[[:space:]]*{}}\)/\1,"claims":{"enableSSHCA":true}/' values.yaml
+$ sed -i '/"type":[[:space:]]*"JWK"/a \ \ \ \ \ \ \ \ \ \ \ \ - {"type":"ACME","name":"acme"}' values.yaml
 ```
 4. base64-encode password into `password.txt`
 ```bash
-$ echo 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' | base64 > password.txt
+$ echo 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' | base64 > ./password.txt
+$ chmod 600 ./password.txt
 ```
 5. Install Helm chart
 ```bash
 $ helm upgrade --install \
     -f values.yaml \
     --set service.targetPort=443 \
-    --set inject.secrets.ca_password=$(cat password.txt) \
-    --set inject.secrets.provisioner_password=$(cat password.txt) \
+    --set inject.secrets.ca_password=$(cat ./password.txt) \
+    --set inject.secrets.provisioner_password=$(cat ./password.txt) \
     --create-namespace -n ca \
     step-ca smallstep/step-certificates
 ```
