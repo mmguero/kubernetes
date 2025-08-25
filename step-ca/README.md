@@ -1,4 +1,4 @@
-# Deploy [Step Certificates](https://github.com/smallstep/helm-charts/blob/master/step-certificates/README.md) (step-ca) with [Helm](https://github.com/smallstep/helm-charts)
+# Deploy [Step Certificates](https://github.com/smallstep/helm-charts/blob/master/step-certificates/README.md) (step-ca) TLS certificate authority with [Helm](https://github.com/smallstep/helm-charts) on Kubernetes
 
 1. Add smallstep Helm repo
 ```bash
