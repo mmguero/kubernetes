@@ -71,3 +71,30 @@ $ kubectl patch \
     --type='json' \
     -p='[{"op":"remove","path":"/webhooks/0"}]'
 ```
+11. Annotate your service(s) (e.g., for [`whoami/whoami.yaml`](whoami/whoami.yaml), add or uncomment `annotations.cert-manager.io/cluster-issuer`  and the `spec.tls` section) and (re)deploy
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami-ingress
+  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: step-ca-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - whoami.k3sdemo.example.org
+      secretName: whoami-tls
+  rules:
+    - host: whoami.k3sdemo.example.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 80
+```
