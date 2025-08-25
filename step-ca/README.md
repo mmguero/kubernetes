@@ -39,20 +39,17 @@ $ yq eval -i '
 $ rm -f ./ssh_host_ca_key ./ssh_host_ca_key.pub ./ssh_user_ca_key ./ssh_user_ca_key.pub
 ```
 5. Add the ACME provisioner to `values.yaml` and add enableSSHCA  claim to JWK provisioner
-
-ssh: {"hostKey": "/home/step/secrets/ssh_host_ca_key", "userKey": "/home/step/secrets/ssh_user_ca_key"}
-
 ```bash
 $ sed -i '/enableAdmin:/a \ \ \ \ \ \ \ \ \ \ ssh: {"hostKey": "/home/step/secrets/ssh_host_ca_key", "userKey": "/home/step/secrets/ssh_user_ca_key"}' values.yaml
 $ sed -i 's/\("ssh":[[:space:]]*{}}\)/\1,"claims":{"enableSSHCA":true}/' values.yaml
 $ sed -i '/"type":[[:space:]]*"JWK"/a \ \ \ \ \ \ \ \ \ \ \ \ - {"type":"ACME","name":"acme"}' values.yaml
 ```
-4. base64-encode password into `password.txt`
+6. base64-encode password into `password.txt`
 ```bash
 $ echo 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' | base64 > ./password.txt
 $ chmod 600 ./password.txt
 ```
-5. Install Helm chart
+7. Install Helm chart
 ```bash
 $ helm upgrade --install \
     -f values.yaml \
@@ -62,16 +59,16 @@ $ helm upgrade --install \
     --create-namespace -n ca \
     step-ca smallstep/step-certificates
 ```
-6. Install ingress
+8. Install ingress for step-ca
 ```bash
 $ kubectl apply -f step-ca/step-ca-ingress.yaml
 ```
-7. Test health
+9. Test health
 ```bash
 $ curl --insecure https://ca.k3sdemo.example.org/health
 {"status":"ok"}
 ```
-8. Install cert-manager and give it the root CA cert
+10. Install cert-manager and give it the root CA cert
 ```bash
 $ kubectl create namespace cert-manager
 $ curl --insecure -o ./ca.pem https://ca.k3sdemo.example.org/roots.pem
@@ -82,11 +79,11 @@ $ kubectl apply -f ./cert-manager.yaml
 $ kubectl get pods -n cert-manager
 $ rm -f ./cert-manager.yaml ./ca.pem
 ```
-9. Create certificate issuer
+11. Create certificate issuer
 ```bash
 $ kubectl apply -f step-ca/step-ca-issuer.yaml
 ````
-10. Patch ingress-nginx-admission
+12. Patch ingress-nginx-admission
 ```bash
 $ kubectl patch \
     validatingwebhookconfiguration \
@@ -94,7 +91,7 @@ $ kubectl patch \
     --type='json' \
     -p='[{"op":"remove","path":"/webhooks/0"}]'
 ```
-11. Annotate your service(s) (e.g., for [`whoami/whoami.yaml`](whoami/whoami.yaml), add or uncomment `annotations.cert-manager.io/cluster-issuer`  and the `spec.tls` section) and (re)deploy
+13. Annotate your service(s) (e.g., for [`whoami/whoami.yaml`](whoami/whoami.yaml), add or uncomment `annotations.cert-manager.io/cluster-issuer`  and the `spec.tls` section) and (re)deploy
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress

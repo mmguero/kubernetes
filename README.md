@@ -21,7 +21,7 @@
     * `kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=120s`
 6. Install [metallb](https://metallb.io/) load-balancer and set up your IP pool
     * `kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml`
-    * `kubectl apply -f matallb/metallb-ip-pool.yaml`
+    * `kubectl apply -f metallb/metallb-ip-pool.yaml`
 7. Start a demo deployment (e.g., [whoami](https://github.com/traefik/whoami))
     * `kubectl apply -f whoami/whoami.yaml`
     * `curl -kL https://whoami.k3sdemo.example.org`
