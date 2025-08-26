@@ -12,7 +12,8 @@ $ step ca init --helm \
     --dns ca.k3sdemo.example.org \
     --dns step-ca.ca.svc.cluster.local \
     --address :443 \
-    --provisioner primero > values.yaml
+    --provisioner primero \
+    --ssh > values.yaml
 ✔ Deployment Type: Standalone
 Choose a password for your CA keys and first provisioner.
 ✔ [leave empty and we'll generate one]: 
@@ -20,39 +21,19 @@ Choose a password for your CA keys and first provisioner.
 
 Generating root certificate... done!
 Generating intermediate certificate... done!
+Generating user and host SSH certificate signing keys... done!
 ```
-3. Generate SSH host and user CA keys (for SSH key provisioning)
+3. Add the ACME provisioner and set `ca.ssh.enabled=true` in `values.yaml`
 ```bash
-$ step crypto keypair ssh_host_ca_key.pub ssh_host_ca_key
-Please enter the password to encrypt the private key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-$ step crypto keypair ssh_user_ca_key.pub ssh_user_ca_key
-Please enter the password to encrypt the private key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-$ tr -d '\n' < ssh_host_ca_key.pub | sponge ssh_host_ca_key.pub
-$ tr -d '\n' < ssh_user_ca_key.pub | sponge ssh_user_ca_key.pub
-```
-4. Add the SSH keys to `values.yaml`
-```bash
-$ yq eval -i '
-  .inject.certificates.ssh_host_ca = strload("ssh_host_ca_key.pub") |
-  .inject.certificates.ssh_user_ca = strload("ssh_user_ca_key.pub") |
-  .inject.secrets.ssh.host_ca_key = strload("ssh_host_ca_key") |
-  .inject.secrets.ssh.user_ca_key = strload("ssh_user_ca_key")
-' ./values.yaml
-$ rm -f ./ssh_host_ca_key ./ssh_host_ca_key.pub ./ssh_user_ca_key ./ssh_user_ca_key.pub
-```
-5. Add the ACME provisioner to `values.yaml` and add enableSSHCA  claim to JWK provisioner
-```bash
-$ yq -i '.inject.config.files."ca.json".ssh.enabled = true' values.yaml
-$ sed -i '/enableAdmin:/a \ \ \ \ \ \ \ \ \ \ ssh: {"hostKey": "/home/step/secrets/ssh_host_ca_key", "userKey": "/home/step/secrets/ssh_user_ca_key"}' values.yaml
-$ sed -i 's/\("ssh":[[:space:]]*{}}\)/\1,"claims":{"enableSSHCA":true}/' values.yaml
 $ sed -i '/"type":[[:space:]]*"JWK"/a \ \ \ \ \ \ \ \ \ \ \ \ - {"type":"ACME","name":"acme"}' values.yaml
+$ sed -i '/userKey:[[:space:]]*\/home\/step\/secrets\/ssh_user_ca_key/a \ \ \ \ \ \ \ \ \ \ enabled: true' values.yaml
 ```
-6. base64-encode password into `password.txt`
+4. base64-encode password into `password.txt`
 ```bash
 $ echo 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' | base64 > ./password.txt
 $ chmod 600 ./password.txt
 ```
-7. Install Helm chart
+5. Install Helm chart
 ```bash
 $ helm upgrade --install \
     -f values.yaml \
@@ -62,16 +43,16 @@ $ helm upgrade --install \
     --create-namespace -n ca \
     step-ca smallstep/step-certificates
 ```
-8. Install ingress for step-ca
+6. Install ingress for step-ca
 ```bash
 $ kubectl apply -f step-ca/step-ca-ingress.yaml
 ```
-9. Test health
+7. Test health
 ```bash
 $ curl --insecure https://ca.k3sdemo.example.org/health
 {"status":"ok"}
 ```
-10. Install cert-manager and give it the root CA cert
+8. Install cert-manager and give it the root CA cert
 ```bash
 $ kubectl create namespace cert-manager
 $ curl --insecure -o ./ca.pem https://ca.k3sdemo.example.org/roots.pem
@@ -82,11 +63,11 @@ $ kubectl apply -f ./cert-manager.yaml
 $ kubectl get pods -n cert-manager
 $ rm -f ./cert-manager.yaml ./ca.pem
 ```
-11. Create certificate issuer
+9. Create certificate issuer
 ```bash
 $ kubectl apply -f step-ca/step-ca-issuer.yaml
-````
-12. Patch ingress-nginx-admission
+```
+10. Patch ingress-nginx-admission (**TODO:** need to look at why I had to do this to get it to work)
 ```bash
 $ kubectl patch \
     validatingwebhookconfiguration \
@@ -94,7 +75,7 @@ $ kubectl patch \
     --type='json' \
     -p='[{"op":"remove","path":"/webhooks/0"}]'
 ```
-13. Annotate your service(s) (e.g., for [`whoami/whoami.yaml`](whoami/whoami.yaml), add or uncomment `annotations.cert-manager.io/cluster-issuer`  and the `spec.tls` section) and (re)deploy
+11. Annotate your service(s) (e.g., for [`whoami/whoami.yaml`](whoami/whoami.yaml), add or uncomment `annotations.cert-manager.io/cluster-issuer`  and the `spec.tls` section) and (re)deploy
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -121,3 +102,4 @@ spec:
                 port:
                   number: 80
 ```
+12. See [bootstrapping clients](https://github.com/mmguero/docker/tree/master/step-ca#bootstrapping-clients) for some notes on client use with `step`
