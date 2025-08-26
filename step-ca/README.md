@@ -28,6 +28,8 @@ Generating user and host SSH certificate signing keys... done!
 $ sed -i '/"type":[[:space:]]*"JWK"/a \ \ \ \ \ \ \ \ \ \ \ \ - {"type":"ACME","name":"acme"}' values.yaml
 $ sed -i '/userKey:[[:space:]]*\/home\/step\/secrets\/ssh_user_ca_key/a \ \ \ \ \ \ \ \ \ \ enabled: true' values.yaml
 ```
+  * If you want to [enable OIDC](https://github.com/mmguero/docker/tree/master/step-ca#oidcoauth), edit `values.yaml` and add this provisioner:
+    * `- {"type":"OIDC","name":"google","clientID":"123456789009-casdfa97asdfcasdf8jklj89090fasd1.apps.googleusercontent.com","clientSecret":"asdfFACSDsadf304JSDAcsl4","configurationEndpoint":"https://accounts.google.com/.well-known/openid-configuration","admins":["user@gmail.com"],"domains":["gmail.com"],"claims":{"enableSSHCA":true}}`
 4. base64-encode password into `password.txt`
 ```bash
 $ echo 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' | base64 > ./password.txt
