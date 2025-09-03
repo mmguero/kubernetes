@@ -24,7 +24,7 @@
     * `kubectl apply -f metallb/metallb-ip-pool.yaml`
 7. Start a demo deployment (e.g., [whoami](https://github.com/traefik/whoami))
     * `kubectl apply -f whoami/whoami.yaml`
-    * `curl -kL https://whoami.k3sdemo.example.org`
+    * `curl -kL https://whoami.example.org`
 
 ### Debugging
 

@@ -44,10 +44,10 @@ spec:
   ingressClassName: nginx
   # tls:
   #   - hosts:
-  #       - whoami.k3sdemo.example.org
+  #       - whoami.example.org
   #     secretName: whoami-tls
   rules:
-    - host: whoami.k3sdemo.example.org
+    - host: whoami.example.org
       http:
         paths:
           - path: /

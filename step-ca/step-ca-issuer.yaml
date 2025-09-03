@@ -4,7 +4,7 @@ metadata:
   name: step-ca-issuer
 spec:
   acme:
-    server: https://ca.k3sdemo.example.org/acme/acme/directory
+    server: https://ca.example.org/acme/acme/directory
     email: user@example.org
     privateKeySecretRef:
       name: step-ca-issuer-key

@@ -9,7 +9,7 @@ $ helm repo add smallstep https://smallstep.github.io/helm-charts/`
 $ step ca init --helm \
     --deployment-type standalone \
     --name step-ca \
-    --dns ca.k3sdemo.example.org \
+    --dns ca.example.org \
     --dns step-ca.ca.svc.cluster.local \
     --address :443 \
     --provisioner primero \
@@ -51,13 +51,13 @@ $ kubectl apply -f step-ca/step-ca-ingress.yaml
 ```
 7. Test health
 ```bash
-$ curl --insecure https://ca.k3sdemo.example.org/health
+$ curl --insecure https://ca.example.org/health
 {"status":"ok"}
 ```
 8. Install cert-manager and give it the root CA cert
 ```bash
 $ kubectl create namespace cert-manager
-$ curl --insecure -o ./ca.pem https://ca.k3sdemo.example.org/roots.pem
+$ curl --insecure -o ./ca.pem https://ca.example.org/roots.pem
 $ kubectl -n cert-manager create configmap step-ca-root --from-file=ca.crt=ca.pem
 $ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.crds.yaml
 $ ./step-ca/get-and-patch-cert-manager-for-step-ca.sh > ./cert-manager.yaml
@@ -90,10 +90,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - whoami.k3sdemo.example.org
+        - whoami.example.org
       secretName: whoami-tls
   rules:
-    - host: whoami.k3sdemo.example.org
+    - host: whoami.example.org
       http:
         paths:
           - path: /
