@@ -319,47 +319,24 @@ webVaultEnabled: "true"
 
 ## @section Database settings
 ##
+# kubectl create secret generic vaultwarden-db-secret \
+# --from-literal=username=vaultwarden \
+# --from-literal=password='xxxxxxxxxxxxxxxxxxxxxx' \
+# -n vaultwarden
 
 database:
-  ## @param database.type Database type, either mysql or postgresql
-  ## Default is a sqlite database.
-  ##
-  type: "default"
-  ## @param database.host Database hostname or IP address
-  ##
-  host: ""
-  ## @param database.port Database port
-  ## Default for MySQL is 3306, default for PostgreSQL is 5432
-  port: ""
-  ## @param database.username Database username
-  ##
+  type: "postgresql"
+  host: "postgresql.example.org"
+  port: "5432"
   username: ""
-  ## @param database.password Database password
-  ##
   password: ""
-  ## @param database.dbName Database name
-  ##
-  dbName: ""
-  ## @param database.uriOverride Manually specify the DB connection string
-  ##
+  dbName: "vaultwarden"
   uriOverride: ""
-  ## @param database.existingSecret Name of an existing secret containing either a single key with the database uri, or a separate key for username and password
-  ##
-  existingSecret: ""
-  ## @param database.existingSecretKey Key in the existing secret
-  ##
+  existingSecret: "vaultwarden-db-secret"
   existingSecretKey: ""
-  ## @param database.existingSecretUserKey Key in the existing secret
-  ##
   existingSecretUserKey: username
-  ## @param database.existingSecretPasswordKey Key in the existing secret
-  ##
   existingSecretPasswordKey: password
-  ## @param database.connectionRetries Number of times to retry the database connection during startup, with 1 second delay between each retry, set to 0 to retry indefinitely.
-  ##
   connectionRetries: 15
-  ## @param database.maxConnections Define the size of the connection pool used for connecting to the database.
-  ##
   maxConnections: 10
 
 ## @section Push Notifications
