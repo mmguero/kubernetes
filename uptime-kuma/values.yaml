@@ -9,7 +9,7 @@ image:
   repository: louislam/uptime-kuma
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.23.16-debian"
+  tag: "2.1.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -58,13 +58,12 @@ service:
   annotations: {}
 
 ingress:
-  enabled: true
-  className: "nginx"
+  enabled: false
+  # className: ""
   extraLabels:
     {}
     # vhost: uptime-kuma.company.corp
   annotations:
-    cert-manager.io/cluster-issuer: step-ca-issuer
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/server-snippets: |
@@ -85,12 +84,13 @@ ingress:
     - host: uptime.example.org
       paths:
         - path: /
-          pathType: Prefix
+          pathType: ImplementationSpecific
 
   tls:
-    - hosts:
-        - uptime.example.org
-      secretName: uptime-kuma-tls
+    []
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
 
 resources:
   {}
@@ -145,10 +145,7 @@ volume:
   enabled: true
   accessMode: ReadWriteOnce
   size: 4Gi
-  # If you want to use a storage class other than the default, uncomment this
-  # line and define the storage class name
-  # storageClassName:
-  # Reuse your own pre-existing PVC.
+  storageClassName: ""
   existingClaim: ""
 
 # -- A list of additional volumes to be added to the pod
@@ -169,17 +166,23 @@ additionalVolumeMounts:
   #   subPath: "additional-ca.pem"
 
 strategy:
-  type: Recreate
+  type: RollingUpdate
 
-# Mariadb configurations
-mariadb:
+# External MySQL/MariaDB database configuration
+# Configure this section to connect to your own MySQL or MariaDB database.
+# You can use any MySQL-compatible provider of your choice.
+externalDatabase:
+  type: "mariadb"
   enabled: false
-  architecture: standalone
-  auth:
-    database: uptime_kuma
-    username: uptime_kuma
-    password: ""
-    rootPassword: ""
+  hostname: ""
+  port: 3306
+  database: uptime_kuma
+  username: uptime_kuma
+  password: ""
+  # Use existing secret for database credentials
+  existingSecret: ""
+  existingSecretPasswordKey: "password"
+  existingSecretUsernameKey: "username"
 
 # Prometheus ServiceMonitor configuration
 serviceMonitor:

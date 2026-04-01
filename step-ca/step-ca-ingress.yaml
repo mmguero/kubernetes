@@ -1,21 +1,17 @@
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
 metadata:
   name: step-ca-ingress
   namespace: ca
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
-  ingressClassName: nginx
-  rules:
-    - host: ca.example.org
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: step-ca-step-certificates
-                port:
-                  number: 443
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`ca.example.org`)
+      kind: Rule
+      services:
+        - name: step-ca-step-certificates
+          port: 443
+          scheme: https
+          serversTransport: step-ca-insecure

@@ -119,7 +119,7 @@ command:
 args: []
 
 # Additional environment variables for Keycloak
-# TODO: why did I have to set all of these to get this to work?
+# TODO: why did I have to set all of these in extraEnv to get this to work?
 extraEnv: |
   - name: KC_HTTP_RELATIVE_PATH
     value: "/"
@@ -333,59 +333,32 @@ serviceHeadless:
   extraPorts: []
 
 ingress:
-  # If `true`, an Ingress is created
   enabled: true
-  # The name of the Ingress Class associated with this ingress
-  ingressClassName: "nginx"
-  # The Service port targeted by the Ingress
+  ingressClassName: "traefik"
   servicePort: http
-  # Ingress annotations
-  annotations:
-    cert-manager.io/cluster-issuer: step-ca-issuer
-    ## Resolve HTTP 502 error using ingress-nginx:
-    ## See https://www.ibm.com/support/pages/502-error-ingress-keycloak-response
-    # nginx.ingress.kubernetes.io/proxy-buffer-size: 128k
-
-  # Additional Ingress labels
+  annotations: {}
+  # annotations:
+  #   cert-manager.io/cluster-issuer: step-ca-issuer
   labels: {}
-   # List of rules for the Ingress
   rules:
-    -
-      # Ingress host
-      host: keycloak.example.org
-      # Paths for the host
+    - host: keycloak.example.org
       paths:
         - path: '/'
           pathType: Prefix
-  # TLS configuration
-  tls:
-    - hosts:
-        - keycloak.example.org
-      secretName: keycloak-tls
-
-  # ingress for console only (/admin)
+  # tls:
+  #   - hosts:
+  #       - keycloak.example.org
+  #     secretName: keycloak-tls
   console:
-    # If `true`, an Ingress is created for console path only
     enabled: false
-    # The name of Ingress Class associated with the console ingress only
     ingressClassName: ""
-    # Ingress annotations for console ingress only
-    # Useful to set nginx.ingress.kubernetes.io/whitelist-source-range particularly
     annotations: {}
     rules:
-      -
-        # Ingress host
-        host: '{{ .Release.Name }}.keycloak.example.com'
-        # Paths for the host
+      - host: '{{ .Release.Name }}.keycloak.example.org'
         paths:
           - path: '/admin'
             pathType: Prefix
-
-    # Console TLS configuration
     tls: []
-#      - hosts:
-#          - console.keycloak.example.com
-#        secretName: ""
 
 ## Network policy configuration
 # https://kubernetes.io/docs/concepts/services-networking/network-policies/

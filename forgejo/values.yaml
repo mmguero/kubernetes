@@ -34,7 +34,7 @@ replicaCount: 1
 ## @param strategy.rollingUpdate.maxSurge maxSurge
 ## @param strategy.rollingUpdate.maxUnavailable maxUnavailable
 strategy:
-  type: 'RollingUpdate'
+  type: Recreate
   rollingUpdate:
     maxSurge: '100%'
     maxUnavailable: 0
@@ -171,24 +171,20 @@ service:
 ## @param ingress.tls Ingress tls settings
 ingress:
   enabled: true
-  className: nginx
-  annotations:
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: step-ca-issuer
-    nginx.ingress.kubernetes.io/proxy-body-size: 0
+  className: traefik
+  annotations: {}
+  # annotations:
+  #   cert-manager.io/cluster-issuer: step-ca-issuer
   hosts:
     - host: git.example.org
       paths:
         - path: /
           pathType: Prefix
           port: http
-  tls:
-    - hosts:
-        - git.example.org
-      secretName: forgejo-tls
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - git.example.com
+  # tls:
+  #   - hosts:
+  #       - git.example.org
+  #     secretName: forgejo-tls
 
 # Enables Gateway API HTTPRoute as a replacement for traditional Ingress resources
 ## @section Gateway-API HTTPRoute

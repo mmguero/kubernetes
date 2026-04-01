@@ -1,0 +1,18 @@
+deployment:
+  replicas: 1
+
+service:
+  type: LoadBalancer
+
+ingressClass:
+  enabled: true
+  name: traefik
+  isDefaultClass: true
+
+providers:
+  kubernetesIngress:
+    enabled: true
+
+logs:
+  general:
+    level: INFO

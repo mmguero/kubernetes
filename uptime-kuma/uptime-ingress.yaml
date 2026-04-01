@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: uptime-kuma-ingress
+  namespace: monitoring
+  annotations: {}
+  # annotations:
+  #   cert-manager.io/cluster-issuer: step-ca-issuer
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: uptime.example.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: uptime-kuma
+                port:
+                  number: 3001
+  # tls:
+  #   - hosts:
+  #       - uptime.example.org
+  #     secretName: uptime-kuma-tls

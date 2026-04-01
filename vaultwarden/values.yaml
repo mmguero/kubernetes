@@ -16,7 +16,7 @@ image:
   ## @param image.tag Vaultwarden image tag
   ## Ref: https://hub.docker.com/r/vaultwarden/server/tags
   ##
-  tag: "1.34.3-alpine"
+  tag: "1.35.4-alpine"
   ## @param image.pullPolicy Vaultwarden image pull policy
   ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
@@ -323,7 +323,6 @@ webVaultEnabled: "true"
 # --from-literal=username=vaultwarden \
 # --from-literal=password='xxxxxxxxxxxxxxxxxxxxxx' \
 # -n vaultwarden
-
 database:
   type: "postgresql"
   host: "postgresql.example.org"
@@ -735,10 +734,11 @@ service:
 
 ingress:
   enabled: true
-  class: "nginx"
-  nginxIngressAnnotations: true
-  additionalAnnotations:
-    cert-manager.io/cluster-issuer: step-ca-issuer
+  class: "traefik"
+  nginxIngressAnnotations: false
+  additionalAnnotations: {}
+  # additionalAnnotations:
+  #  cert-manager.io/cluster-issuer: step-ca-issuer
   labels: {}
   tls: true
   hostname: "vaultwarden.example.org"
