@@ -58,12 +58,12 @@ Because Step CA serves HTTPS on the backend service, Traefik needs a transport t
 kubectl apply -f step-ca/step-ca-transport.yaml
 ```
 
-7. Expose Step CA through Traefik with an `IngressRoute`
+7. Expose Step CA through Traefik with TLS passthrough with an `IngressRouteTCP`
 
-Use a Traefik `IngressRoute` instead of a standard Kubernetes `Ingress`. Apply [`step-ca-ingress.yaml`](./step-ca-ingress.yaml):
+Use a Traefik `IngressRouteTCP` instead of a standard Kubernetes `Ingress`. Apply [`step-ca-tls-passthrough.yaml`](./step-ca-tls-passthrough.yaml):
 
 ```bash
-kubectl apply -f step-ca/step-ca-ingress.yaml
+kubectl apply -f step-ca/step-ca-tls-passthrough.yaml
 ```
 
 8. Test health / ACME endpoint

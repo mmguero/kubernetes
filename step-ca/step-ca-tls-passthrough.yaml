@@ -1,17 +1,15 @@
----
 apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+kind: IngressRouteTCP
 metadata:
-  name: step-ca-ingress
+  name: step-ca-passthrough
   namespace: ca
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`ca.example.org`)
-      kind: Rule
+    - match: HostSNI(`ca.example.org`)
       services:
         - name: step-ca-step-certificates
           port: 443
-          scheme: https
-          serversTransport: step-ca-insecure
+  tls:
+    passthrough: true
